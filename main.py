@@ -31,7 +31,13 @@ async def place_deriv_trade(signal):
 
 @app.post("/webhook")
 async def webhook(req: Request):
-    data = await req.json()
+            raw = await request.body()
+        text = raw.decode('utf-8', errors='ignore').replace('\x00','').strip()
+        s = text.find('{')
+        e = text.rfind('}')+1
+        if s>=0 and e>0:
+            text = text[s:e]
+        data = json.loads(text)
     result = await place_deriv_trade(data)
     return result
 
