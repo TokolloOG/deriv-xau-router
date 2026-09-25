@@ -31,16 +31,20 @@ async def place_deriv_trade(signal):
 
 @app.post("/webhook")
 async def webhook(req: Request):
-            raw = await request.body()
+    try:
+        raw = await req.body()
         text = raw.decode('utf-8', errors='ignore').replace('\x00','').strip()
         s = text.find('{')
         e = text.rfind('}')+1
         if s>=0 and e>0:
             text = text[s:e]
         data = json.loads(text)
-    result = await place_deriv_trade(data)
-    return result
-
+        print(f"OK webhook: {data}")
+        result = await place_deriv_trade(data)
+        return result
+    except Exception as ex:
+        print(f"BAD JSON: {ex}")
+        return {"ok": False, "error": str(ex), "fixed": True}
 @app.get("/")
 def home():
     return {"status": "ok - Render fixed 520"}
